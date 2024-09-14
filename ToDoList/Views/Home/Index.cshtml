@@ -1,8 +1,74 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<ToDoList.Models.ToDoItem>
+
+@{
+    ViewData["Title"] = "Lista ToDo";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h2>Lista ToDo</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tytuł</th>
+            <th>Ukończone</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>
+                        <input type="checkbox" class="task-checkbox" data-id="@item.Id" @(item.IsCompleted ? "checked" : "") />
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edytuj</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">Brak danych do wyświetlenia</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // zmiana checkboxa
+            $(".task-checkbox").change(function () {
+                var checkbox = $(this);
+                var isChecked = checkbox.is(":checked"); // sprawdzenie czy checkbox jest zaznaczony
+                var itemId = checkbox.data("id"); // pobranie ID zadania z atrybutu data-id
+
+                $.ajax({
+                    url: '@Url.Action("ToggleCompletion", "ToDoItems")', // URL do metody ToggleCompletion
+                    type: 'POST',
+                    data: {
+                        id: itemId,           // wysłanie ID zadania
+                        isCompleted: isChecked // wysłanie nowego statusu ukończenia
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            console.log("Status zadania zaktualizowany.");
+                        } else {
+                            console.error("Błąd: " + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Błąd przy aktualizacji zadania: " + error);
+                    }
+                });
+            });
+        });
+    </script>
+}

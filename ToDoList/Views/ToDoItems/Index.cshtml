@@ -2,6 +2,30 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $(".task-checkbox").change(function () {
+                var checkbox = $(this);
+                var isChecked = checkbox.is(":checked");
+                var itemId = checkbox.data("id");
+
+                $.ajax({
+                    url: '@Url.Action("ToggleCompletion", "ToDoItems")',
+                    type: 'POST',
+                    data: {
+                        id: itemId,
+                        isCompleted: isChecked
+                    },
+                    success: function (result) {
+                        console.log("Task status updated.");
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error updating task status: " + error);
+                    }
+                });
+            });
+        });
+    </script>
 }
 
 <h1>ToDo List</h1>
@@ -24,8 +48,8 @@
                 <td>@Html.DisplayFor(modelItem => item.Title)</td>
                 <td>@Html.DisplayFor(modelItem => item.IsCompleted)</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edytuj</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
                 </td>
             </tr>
         }
